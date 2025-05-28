@@ -1,0 +1,522 @@
+:root {
+    --primary-color: #4a90e2;
+    --secondary-color: #f5f5f5;
+    --accent-color: #ff6b6b;
+    --success-color: #4CAF50;
+    --text-color: #333;
+    --grid-size: 11;
+    --cell-size: min(calc(95vw / var(--grid-size)), 40px);
+    --animation-duration: 0.3s;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-color);
+}
+
+.game-container {
+    background: white;
+    padding: 1rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    width: 95%;
+    position: relative;
+    overflow: hidden;
+}
+
+.game-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    animation: gradientMove 3s linear infinite;
+}
+
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+.game-header {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+h1 {
+    color: var(--primary-color);
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.game-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background: var(--secondary-color);
+    border-radius: 8px;
+    font-size: 0.8rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 0.3rem;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    color: #666;
+    margin-bottom: 0.2rem;
+}
+
+.stat-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    background: #357abd;
+}
+
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-size), var(--cell-size));
+    grid-template-rows: repeat(var(--grid-size), var(--cell-size));
+    gap: 2px;
+    background: #ddd;
+    padding: 2px;
+    border-radius: 8px;
+    margin: 0 auto;
+    max-width: calc(var(--cell-size) * var(--grid-size) + 4px);
+}
+
+.cell {
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all var(--animation-duration) cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+.cell::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(74, 144, 226, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+}
+
+.cell:hover::before {
+    width: 100%;
+    height: 100%;
+}
+
+.cell:active {
+    transform: scale(0.95);
+}
+
+.cell.blocked {
+    background: var(--accent-color);
+    cursor: not-allowed;
+    animation: blockCell 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+@keyframes blockCell {
+    0% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.cell.cat {
+    background: var(--success-color);
+    animation: catPulse 2s infinite;
+    z-index: 2;
+}
+
+@keyframes catPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.cell.cat::after {
+    content: '🐱';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: calc(var(--cell-size) * 0.6);
+    animation: catBounce 0.5s infinite alternate;
+    pointer-events: none;
+}
+
+@keyframes catBounce {
+    from { transform: translate(-50%, -50%) scale(1); }
+    to { transform: translate(-50%, -50%) scale(1.1); }
+}
+
+.cat-moving {
+    animation: catMove var(--animation-duration) cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translate(var(--move-x, 0), var(--move-y, 0));
+    z-index: 3;
+}
+
+@keyframes catMove {
+    0% { 
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    50% { 
+        transform: translate(calc(var(--move-x) * 0.5), calc(var(--move-y) * 0.5)) scale(1.1);
+        opacity: 0.8;
+    }
+    100% { 
+        transform: translate(var(--move-x), var(--move-y)) scale(1);
+        opacity: 1;
+    }
+}
+
+.game-message {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    backdrop-filter: blur(5px);
+}
+
+.game-message.active {
+    display: flex;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.message-content {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    transform: scale(0.9);
+    animation: popIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.message-content h2 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+}
+
+#play-again-btn {
+    background: var(--success-color);
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#play-again-btn:hover {
+    background: #43a047;
+    transform: translateY(-2px) scale(1.02);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes popIn {
+    from { transform: scale(0.9); }
+    to { transform: scale(1); }
+}
+
+@media (max-width: 600px) {
+    .game-container {
+        padding: 0.5rem;
+        width: 100%;
+        border-radius: 0;
+        min-height: 100vh;
+    }
+
+    .game-stats {
+        grid-template-columns: repeat(3, 1fr);
+        font-size: 0.7rem;
+        padding: 0.3rem;
+        gap: 0.3rem;
+    }
+
+    .stat-item:nth-child(4),
+    .stat-item:nth-child(5) {
+        display: none;
+    }
+
+    .stat-label {
+        font-size: 0.6rem;
+    }
+
+    .stat-value {
+        font-size: 0.8rem;
+    }
+
+    .level-controls {
+        flex-direction: column;
+        gap: 0.3rem;
+        padding: 0.3rem;
+    }
+
+    .level-select {
+        width: 100%;
+        font-size: 0.9rem;
+        padding: 0.3rem;
+    }
+
+    .game-controls {
+        gap: 0.5rem;
+    }
+
+    button {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .help-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+
+    .help-content {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .help-section {
+        margin: 1rem 0;
+    }
+
+    .help-section h3 {
+        font-size: 1.1rem;
+    }
+
+    .message-content {
+        padding: 1rem;
+        width: 90%;
+    }
+
+    .message-content h2 {
+        font-size: 1.3rem;
+    }
+
+    #play-again-btn {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+    }
+}
+
+@media (hover: none) {
+    .cell:active {
+        transform: scale(0.95);
+    }
+
+    button:active {
+        transform: scale(0.95);
+    }
+
+    .game-board {
+        touch-action: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+}
+
+.level-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background: var(--secondary-color);
+    border-radius: 8px;
+}
+
+.level-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.level-label {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.level-select {
+    padding: 0.5rem;
+    border: 2px solid var(--primary-color);
+    border-radius: 6px;
+    font-size: 1rem;
+    color: var(--text-color);
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.level-select:hover {
+    border-color: var(--accent-color);
+}
+
+.game-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.help-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    padding: 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+    background: var(--accent-color);
+}
+
+.help-btn:hover {
+    background: #ff5252;
+}
+
+.help-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 200;
+    justify-content: center;
+    align-items: center;
+}
+
+.help-modal.active {
+    display: flex;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.help-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: popIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.help-section {
+    margin: 1.5rem 0;
+}
+
+.help-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.help-section ul {
+    list-style-type: none;
+    padding-left: 1rem;
+}
+
+.help-section li {
+    margin: 0.5rem 0;
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.help-section li::before {
+    content: '•';
+    color: var(--accent-color);
+    position: absolute;
+    left: 0;
+    font-size: 1.2rem;
+}
+
+.cell.special {
+    background: #ffd700;
+    animation: specialPulse 2s infinite;
+}
+
+@keyframes specialPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); box-shadow: 0 0 10px #ffd700; }
+    100% { transform: scale(1); }
+}
+
+.cell.special-active {
+    animation: specialActivate 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes specialActivate {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.cell.frozen {
+    animation: frozen 1s infinite;
+}
+
+@keyframes frozen {
+    0% { filter: hue-rotate(0deg); }
+    50% { filter: hue-rotate(180deg); }
+    100% { filter: hue-rotate(360deg); }
+} 
